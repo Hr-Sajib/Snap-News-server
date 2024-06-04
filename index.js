@@ -43,6 +43,7 @@ async function run() {
 
     // collections
     const ArticlesCollection = client.db('Snap-News').collection('articles');
+    const PublishersCollection = client.db('Snap-News').collection('publishers');
 
 
 
@@ -57,6 +58,26 @@ async function run() {
 
     })
 
+    app.post('/addPublisher', async(req,res)=>{
+        const pub = req.body;
+        
+        const r = await PublishersCollection.insertOne(pub)
+        res.send(r);
+
+    })
+
+    app.get('/getPublishers', async(req,res)=>{
+        const query = PublishersCollection.find();
+        const r = await query.toArray();
+        res.send(r);
+    })
+
+    app.get('/getArticles', async(req,res)=>{
+        const query = ArticlesCollection.find();
+        const r = await query.toArray();
+        res.send(r);
+    })
+    
 
 
 
