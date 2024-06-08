@@ -58,6 +58,7 @@ async function run() {
 
     })
 
+
     app.post('/addPublisher', async(req,res)=>{
         const pub = req.body;
         
@@ -77,6 +78,31 @@ async function run() {
         const r = await query.toArray();
         res.send(r);
     })
+
+
+    app.get('/getSearchedArticles/:text', async(req,res)=>
+    {
+      try{
+        const searchText = req.params.text;
+        
+        const query = {
+          $or : [
+            { title: { $regex: searchText, $options: 'i' } }, 
+            { description: { $regex: searchText, $options: 'i' } }, 
+          ]
+        }
+
+        const cursor = ArticlesCollection.find(query);
+        const r = await cursor.toArray();
+
+        res.send(r);
+      }
+      catch(error){
+        console.error("Error searching for blogs:", error);
+        res.status(500).send({ message: "Internal Server Error" });
+      }
+    })
+
     
 
 
@@ -105,5 +131,5 @@ async function run() {
 run().catch(console.dir);
 
 app.listen(port, ()=>{
-    console.log(`Snapnews server runnning on $port`);
+    console.log(`Snapnews server runnning on ${port}`);
 })
