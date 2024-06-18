@@ -4,6 +4,8 @@ const app = express();
 const port = process.env.port || 5500;
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config()
+const { ObjectId } = require('mongodb');
+
 
 
 
@@ -14,8 +16,6 @@ app.use(express.json());
 app.get('/', (req,res)=>{
     res.send("server running ..")
 })
-
-
 
 
 
@@ -78,6 +78,38 @@ async function run() {
         const r = await query.toArray();
         res.send(r);
     })
+
+    app.get('/getarticle/:id', async(req,res)=>{
+      const id = req.params.id;
+      
+      const query = { _id: new ObjectId(id)};
+      const result =  await ArticlesCollection.findOne(query);
+
+      res.send(result);
+
+  })
+
+  app.post('/updateviews/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const query = { _id: new ObjectId(id) };
+        const update = { $inc: { views: 1 } };
+        const result = await ArticlesCollection.updateOne(query, update);
+
+        if (result.modifiedCount > 0) {
+            res.send({ message: 'View count updated' });
+        } else {
+            res.status(404).send({ message: 'Article not found or view count not updated' });
+        }
+    } catch (error) {
+        res.status(500).send({ message: 'Error updating view count', error: error.message });
+    }
+});
+
+
+
+
 
 
     app.get('/getSearchedArticles/:text', async(req,res)=>
