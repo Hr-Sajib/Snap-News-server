@@ -81,6 +81,42 @@ async function run() {
         res.send(r);
     })
 
+    app.get('/getUsers', async(req,res)=>{
+        const query = UsersCollection.find();
+        const r = await query.toArray();
+        res.send(r);
+    })
+    app.get('/getUser/:email', async(req,res)=>{
+      const email = req.params.email;
+
+      const query = { userEmail: email};
+      const result =  await UsersCollection.findOne(query);
+
+      res.send(result);
+    })
+
+
+    app.put('/updateUser/:email', async (req, res) => {
+      const email = req.params.email;
+      const updatedUser = req.body;
+    console.log(updatedUser)
+      const query = { userEmail: email };
+      const update = {
+        $set: {
+          premiumToken : updatedUser.premiumToken,
+          period : updatedUser.period
+        },
+      };
+    
+        const result = await UsersCollection.updateOne(query, update);
+        res.send(result)
+
+      
+    });
+    
+
+
+
     app.get('/getArticles', async(req,res)=>{
         const query = ArticlesCollection.find();
         const r = await query.toArray();
