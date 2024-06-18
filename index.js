@@ -44,16 +44,24 @@ async function run() {
     // collections
     const ArticlesCollection = client.db('Snap-News').collection('articles');
     const PublishersCollection = client.db('Snap-News').collection('publishers');
+    const UsersCollection = client.db('Snap-News').collection('users');
 
 
 
 
-    // service api 
-
+    // service api
     app.post('/addArticles', async(req,res)=>{
         const article = req.body;
         
         const r = await ArticlesCollection.insertOne(article)
+        res.send(r);
+
+    })
+
+    app.post('/addUser', async(req,res)=>{
+        const user = req.body;
+        
+        const r = await UsersCollection.insertOne(user)
         res.send(r);
 
     })
