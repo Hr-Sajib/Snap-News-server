@@ -206,6 +206,23 @@ app.put('/approvePost/:id', async (req, res) => {
 
 });
 
+// Decline Post endpoint
+app.put('/declinePost/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const data = req.body;
+
+  const updatedPost = {
+    $set:{
+      approval : data.approval
+    }
+  }
+  const options = {upsert : true};
+  const r = await ArticlesCollection.updateOne(query, updatedPost, options)
+  res.send(r);
+
+});
+
 
 
 
