@@ -104,7 +104,6 @@ async function run() {
       const update = {
         $set: {
           premiumToken : updatedUser.premiumToken,
-          period : updatedUser.period
         },
       };
     
@@ -113,6 +112,33 @@ async function run() {
 
       
     });
+
+    app.put('/updateUserInfo/:email', async (req, res) => {
+      const email = req.params.email;
+      const updatedUser = req.body;
+      console.log(updatedUser);
+    
+      const query = { userEmail: email };
+      const update = {
+        $set: {
+          name: updatedUser.name,
+          contactEmail: updatedUser.contactEmail,
+          age: updatedUser.age,
+          address: updatedUser.address,
+          language: updatedUser.language,
+          favoriteCategories: updatedUser.favoriteCategories,
+        },
+      };
+    
+      try {
+        const result = await UsersCollection.updateOne(query, update);
+        res.send(result);
+      } catch (error) {
+        console.error('Error updating user data:', error);
+        res.status(500).send('Error updating user data');
+      }
+    });
+    
     
 
 
@@ -150,6 +176,17 @@ async function run() {
         res.status(500).send({ message: 'Error updating view count', error: error.message });
     }
 });
+
+
+app.delete('/delete/:id', async(req,res)=>{
+  const id = req.params.id;
+  
+  const query = {_id: new ObjectId(id)};
+
+  const result = await ArticlesCollection.deleteOne(query);
+  res.send(result);
+
+})
 
 
 
