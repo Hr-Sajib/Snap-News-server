@@ -9,6 +9,7 @@ const { ObjectId } = require('mongodb');
 
 
 
+
 // middlewire
 app.use(cors())
 app.use(express.json());
@@ -116,7 +117,6 @@ async function run() {
     app.put('/updateUserInfo/:email', async (req, res) => {
       const email = req.params.email;
       const updatedUser = req.body;
-      console.log(updatedUser);
     
       const query = { userEmail: email };
       const update = {
@@ -187,6 +187,24 @@ app.delete('/delete/:id', async(req,res)=>{
   res.send(result);
 
 })
+
+
+// Approve Post endpoint
+app.put('/approvePost/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const data = req.body;
+
+  const updatedPost = {
+    $set:{
+      approval : data.approval
+    }
+  }
+  const options = {upsert : true};
+  const r = await ArticlesCollection.updateOne(query, updatedPost, options)
+  res.send(r);
+
+});
 
 
 
