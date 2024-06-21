@@ -87,6 +87,8 @@ async function run() {
         const r = await query.toArray();
         res.send(r);
     })
+
+
     app.get('/getUser/:email', async(req,res)=>{
       const email = req.params.email;
 
@@ -100,7 +102,7 @@ async function run() {
     app.put('/updateUser/:email', async (req, res) => {
       const email = req.params.email;
       const updatedUser = req.body;
-    console.log(updatedUser)
+
       const query = { userEmail: email };
       const update = {
         $set: {
@@ -109,10 +111,25 @@ async function run() {
       };
     
         const result = await UsersCollection.updateOne(query, update);
-        res.send(result)
-
-      
+        res.send(result) 
     });
+
+
+    app.put('/makeAdmin/:email', async(req,res)=>{
+      const email = req.params.email;
+      const role = req.body.role;
+      
+      const query = { userEmail: email };
+      const update = {
+        $set: {
+          role : role,
+        },
+      };
+
+      const result = await UsersCollection.updateOne(query, update);
+      res.send(result) 
+
+    })
 
     app.put('/updateUserInfo/:email', async (req, res) => {
       const email = req.params.email;
@@ -240,7 +257,6 @@ async function run() {
       const r = await ArticlesCollection.updateOne(query, updatedPost, options)
       res.send(r)
     })
-
 
 
 
