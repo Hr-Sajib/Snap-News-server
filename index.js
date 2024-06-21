@@ -175,53 +175,73 @@ async function run() {
     } catch (error) {
         res.status(500).send({ message: 'Error updating view count', error: error.message });
     }
-});
+  });
 
 
-app.delete('/delete/:id', async(req,res)=>{
-  const id = req.params.id;
-  
-  const query = {_id: new ObjectId(id)};
+    app.delete('/delete/:id', async(req,res)=>{
+      const id = req.params.id;
+      
+      const query = {_id: new ObjectId(id)};
 
-  const result = await ArticlesCollection.deleteOne(query);
-  res.send(result);
+      const result = await ArticlesCollection.deleteOne(query);
+      res.send(result);
 
-})
+    })
 
 
-// Approve Post endpoint
-app.put('/approvePost/:id', async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  const data = req.body;
+    // Approve Post endpoint
+    app.put('/approvePost/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const data = req.body;
 
-  const updatedPost = {
-    $set:{
-      approval : data.approval
-    }
-  }
-  const options = {upsert : true};
-  const r = await ArticlesCollection.updateOne(query, updatedPost, options)
-  res.send(r);
+      const updatedPost = {
+        $set:{
+          approval : data.approval
+        }
+      }
+      const options = {upsert : true};
+      const r = await ArticlesCollection.updateOne(query, updatedPost, options)
+      res.send(r);
 
-});
+    });
 
-// Decline Post endpoint
-app.put('/declinePost/:id', async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  const data = req.body;
+    // Decline Post endpoint
+    app.put('/declinePost/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const data = req.body;
 
-  const updatedPost = {
-    $set:{
-      approval : data.approval
-    }
-  }
-  const options = {upsert : true};
-  const r = await ArticlesCollection.updateOne(query, updatedPost, options)
-  res.send(r);
+      const updatedPost = {
+        $set:{
+          approval : data.approval
+        }
+      }
+      const options = {upsert : true};
+      const r = await ArticlesCollection.updateOne(query, updatedPost, options)
+      res.send(r);
 
-});
+    });
+
+
+
+    app.put('/makePremium/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      // const data = req.body;
+
+      const updatedPost = {
+        $set:{
+          premium : 'yes'
+        }
+      }
+
+      const options = {upsert : true}
+      const r = await ArticlesCollection.updateOne(query, updatedPost, options)
+      res.send(r)
+    })
+
+
 
 
 
