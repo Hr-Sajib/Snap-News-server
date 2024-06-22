@@ -5,13 +5,23 @@ const port = process.env.port || 5500;
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config()
 const { ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 
 
 
+//cookie parser
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 
 // middlewire
-app.use(cors())
+app.use(cors(
+  {
+      origin: ['http://localhost:5173', 'https://snapnews-ecc6b.web.app/']
+      // credentials:true
+  }
+));
+
 app.use(express.json());
 
 app.get('/', (req,res)=>{
@@ -50,8 +60,42 @@ async function run() {
 
 
 
+
+
+    //jwt api
+
+    app.post('/jwt', async (req, res) => {
+      const user = req.body.curUser;
+      const token = jwt.sign({ data: user }, process.env.access_token_secret, { expiresIn: '1h' });
+      res.send(token);
+    });
+
+    // verify Token middleware
+
+    const verifyToken = (req,res,next) => {
+
+      if(!req.headers.authorization){
+        return res.status(401).send({message: 'Forbidden Access..'})
+      }
+      
+      const token = req.headers.authorization.split(' ')[1];
+      jwt.verify(token, process.env.access_token_secret, (err, decoded)=>{
+        if(err){
+          return res.status(401).send({message: 'Forbidden Access..'})
+        }
+
+        req.decoded = decoded;
+        console.log('varified')
+        next();
+      })
+
+    }
+    
+
+
+
     // service api
-    app.post('/addArticles', async(req,res)=>{
+    app.post('/addArticles',verifyToken, async(req,res)=>{
         const article = req.body;
         
         const r = await ArticlesCollection.insertOne(article)
@@ -68,7 +112,7 @@ async function run() {
     })
 
 
-    app.post('/addPublisher', async(req,res)=>{
+    app.post('/addPublisher',verifyToken, async(req,res)=>{
         const pub = req.body;
         
         const r = await PublishersCollection.insertOne(pub)
@@ -89,7 +133,7 @@ async function run() {
     })
 
 
-    app.get('/getUser/:email', async(req,res)=>{
+    app.get('/getUser/:email',verifyToken, async(req,res)=>{
       const email = req.params.email;
 
       const query = { userEmail: email};
@@ -99,7 +143,7 @@ async function run() {
     })
 
 
-    app.put('/updateUser/:email', async (req, res) => {
+    app.put('/updateUser/:email',verifyToken, async (req, res) => {
       const email = req.params.email;
       const updatedUser = req.body;
 
@@ -115,7 +159,7 @@ async function run() {
     });
 
 
-    app.put('/makeAdmin/:email', async(req,res)=>{
+    app.put('/makeAdmin/:email',verifyToken, async(req,res)=>{
       const email = req.params.email;
       const role = req.body.role;
       
@@ -131,7 +175,7 @@ async function run() {
 
     })
 
-    app.put('/updateUserInfo/:email', async (req, res) => {
+    app.put('/updateUserInfo/:email',verifyToken, async (req, res) => {
       const email = req.params.email;
       const updatedUser = req.body;
     
@@ -166,6 +210,18 @@ async function run() {
         res.send(r);
     })
 
+    app.get('/getPremArticles',verifyToken, async (req, res) => {
+      try {
+        const query = ArticlesCollection.find({ premium: 'yes' });
+        const articles = await query.toArray();
+        res.send(articles);
+      } catch (error) {
+        console.error('Error fetching premium articles:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+    
+
     app.get('/getarticle/:id', async(req,res)=>{
       const id = req.params.id;
       
@@ -175,6 +231,18 @@ async function run() {
       res.send(result);
 
   })
+
+  app.get('/getArticles/:email',verifyToken, async (req, res) => {
+    try {
+      const email = req.params.email;
+      const query = ArticlesCollection.find({ authorEmail: email });
+      const articles = await query.toArray();
+      res.send(articles);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
 
   app.put('/updateArticle/:id', async(req,res)=>{
     const id = req.params.id;
@@ -222,7 +290,7 @@ async function run() {
   });
 
 
-    app.delete('/delete/:id', async(req,res)=>{
+    app.delete('/delete/:id',verifyToken, async(req,res)=>{
       const id = req.params.id;
       
       const query = {_id: new ObjectId(id)};
@@ -234,7 +302,7 @@ async function run() {
 
 
     // Approve Post endpoint
-    app.put('/approvePost/:id', async (req, res) => {
+    app.put('/approvePost/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const data = req.body;
@@ -251,7 +319,7 @@ async function run() {
     });
 
     // Decline Post endpoint
-    app.put('/declinePost/:id', async (req, res) => {
+    app.put('/declinePost/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const data = req.body;
@@ -269,10 +337,9 @@ async function run() {
 
 
 
-    app.put('/makePremium/:id', async(req,res)=>{
+    app.put('/makePremium/:id',verifyToken, async(req,res)=>{
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      // const data = req.body;
 
       const updatedPost = {
         $set:{
