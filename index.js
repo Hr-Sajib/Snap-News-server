@@ -176,6 +176,33 @@ async function run() {
 
   })
 
+  app.put('/updateArticle/:id', async(req,res)=>{
+    const id = req.params.id;
+    const updatedArticle = req.body;
+    const query = { _id: new ObjectId(id) };
+
+    const update = {
+      $set: {
+        title: updatedArticle.title,
+        publisher: updatedArticle.publisher,
+        tags: updatedArticle.tags,
+        description: updatedArticle.description,
+        image: updatedArticle.image,
+      }
+    }
+
+    const options = {upsert: true};
+
+
+    const r = await ArticlesCollection.updateOne(query, update, options)
+    res.send(r);
+  })
+
+
+
+
+
+
   app.post('/updateviews/:id', async (req, res) => {
     const id = req.params.id;
 
