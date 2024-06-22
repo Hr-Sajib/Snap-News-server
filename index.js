@@ -17,8 +17,8 @@ app.use(cookieParser());
 // middlewire
 app.use(cors(
   {
-      origin: ['http://localhost:5173', 'https://snapnews-ecc6b.web.app/']
-      // credentials:true
+      origin: ['http://localhost:5173', 'https://snapnews-ecc6b.web.app'],
+      credentials:true
   }
 ));
 
@@ -244,7 +244,7 @@ async function run() {
     }
   });
 
-  app.put('/updateArticle/:id', async(req,res)=>{
+  app.put('/updateArticle/:id',verifyToken, async(req,res)=>{
     const id = req.params.id;
     const updatedArticle = req.body;
     const query = { _id: new ObjectId(id) };
