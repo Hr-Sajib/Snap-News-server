@@ -184,6 +184,7 @@ async function run() {
         $set: {
           name: updatedUser.name,
           contactEmail: updatedUser.contactEmail,
+          userImage:updatedUser.userImage,
           age: updatedUser.age,
           address: updatedUser.address,
           language: updatedUser.language,
